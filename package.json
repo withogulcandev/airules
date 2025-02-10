@@ -1,0 +1,23 @@
+{
+  "name": "airules",
+  "version": "2.1.1",
+  "description": "A CLI tool for ai rules.",
+  "main": "src/index.js",
+  "bin": {
+    "airules": "./src/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "author": "Ogulcan Turk <account.work@ogulcan.dev>",
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "cli",
+    "rules"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

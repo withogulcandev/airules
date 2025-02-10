@@ -1,0 +1,156 @@
+---
+description: Next.js 14+ Project Structure and Organization Guidelines
+globs: ["**/*.tsx", "**/*.ts", "**/page.tsx", "**/layout.tsx"]
+---
+
+# Next.js Project Structure Guidelines
+
+1. Core Directory Structure
+```
+├── app/                 # App Router (Next.js 13+)
+├── components/          # React components
+├── lib/                # Utilities and helpers
+├── public/             # Static assets
+├── styles/             # Global styles
+└── types/              # TypeScript definitions
+```
+
+2. App Router Structure
+```
+app/
+├── layout.tsx          # Root layout
+├── page.tsx           # Home page
+├── error.tsx          # Error handling
+├── loading.tsx        # Loading UI
+├── not-found.tsx      # 404 page
+├── (auth)/            # Auth group
+│   ├── login/
+│   │   ├── page.tsx
+│   │   └── actions.ts
+│   └── register/
+│       ├── page.tsx
+│       └── actions.ts
+├── api/               # Route handlers
+│   └── v1/
+│       ├── auth/
+│       └── users/
+└── dashboard/
+    ├── layout.tsx    # Dashboard layout
+    ├── page.tsx      # Dashboard home
+    └── settings/
+        └── page.tsx
+```
+
+3. Components Organization
+```
+components/
+├── ui/               # Shared UI components
+│   ├── button/
+│   │   ├── index.tsx
+│   │   ├── types.ts
+│   │   └── styles.module.css
+│   └── input/
+├── forms/           # Form components
+│   ├── login/
+│   └── register/
+└── layouts/         # Layout components
+    ├── header/
+    └── footer/
+```
+
+4. Lib Structure
+```
+lib/
+├── api/             # API client functions
+├── auth/            # Authentication utilities
+├── db/              # Database utilities
+├── hooks/           # Custom React hooks
+└── utils/           # Helper functions
+```
+
+5. Naming Conventions
+
+Components:
+- PascalCase for component files: `Button.tsx`
+- kebab-case for directories: `auth-form/`
+- Suffix test files with `.test` or `.spec`
+
+Files:
+- camelCase for utilities: `formatDate.ts`
+- kebab-case for configurations: `tailwind.config.js`
+- Use descriptive, full words
+
+6. File Organization
+
+Component File Structure:
+```tsx
+// Import order
+import { type } from 'dependency'
+import { internal } from '@/lib'
+import { component } from '@/components'
+
+// Types
+interface Props {
+  // ...
+}
+
+// Component
+export function Component({ prop }: Props) {
+  return (...)
+}
+```
+
+7. Route Conventions
+
+Route Files:
+- `page.tsx` - Page UI
+- `layout.tsx` - Shared layouts
+- `loading.tsx` - Loading UI
+- `error.tsx` - Error handling
+- `not-found.tsx` - 404 pages
+- `route.ts` - API endpoints
+- `actions.ts` - Server actions
+
+8. Configuration Files
+```
+├── .env.local         # Local env vars
+├── .env.development   # Development vars
+├── .env.production    # Production vars
+├── next.config.js     # Next.js config
+├── tailwind.config.js # Tailwind config
+├── tsconfig.json      # TypeScript config
+└── package.json       # Dependencies
+```
+
+9. Best Practices
+
+Project Structure:
+- Keep directory structure flat where possible
+- Group related features together
+- Use route groups for organization
+- Keep components close to where they're used
+- Separate business logic from UI
+
+Code Organization:
+- Use TypeScript for type safety
+- Implement proper error boundaries
+- Keep components focused and small
+- Use proper loading states
+- Follow accessibility guidelines
+
+File Naming:
+- Be consistent with naming patterns
+- Use clear, descriptive names
+- Follow team conventions
+- Use proper file extensions
+
+10. Performance Guidelines
+
+- Implement proper code splitting
+- Use Image component for images
+- Optimize fonts loading
+- Minimize client-side JavaScript
+- Use proper caching strategies
+- Implement streaming where needed
+
+These guidelines ensure a maintainable, scalable, and performant Next.js application structure. 

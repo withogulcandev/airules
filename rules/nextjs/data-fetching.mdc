@@ -1,0 +1,139 @@
+---
+description: Next.js Data Fetching and State Management Patterns
+globs: ["**/page.tsx", "**/layout.tsx", "**/route.ts", "**/actions.ts"]
+---
+
+# Next.js Data Fetching Guidelines
+
+1. Server Component Data Fetching:
+```tsx
+// Preferred pattern for server components
+async function getData() {
+  const res = await fetch('https://api.example.com/data', {
+    next: { revalidate: 3600 }, // Cache for 1 hour
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  
+  if (!res.ok) {
+    throw new Error('Failed to fetch data');
+  }
+  
+  return res.json();
+}
+
+export default async function Page() {
+  const data = await getData();
+  return <DataDisplay data={data} />;
+}
+```
+
+2. Route Handlers (API Routes):
+```tsx
+// app/api/items/route.ts
+import { NextResponse } from 'next/server';
+import { z } from 'zod'; // For validation
+
+// GET handler
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const data = await fetchData(searchParams);
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch data' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST handler with validation
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    
+    // Validate input
+    const schema = z.object({
+      title: z.string().min(1),
+      content: z.string()
+    });
+    
+    const validated = schema.parse(body);
+    const result = await saveData(validated);
+    
+    return NextResponse.json(result, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Invalid request' },
+      { status: 400 }
+    );
+  }
+}
+```
+
+3. Server Actions:
+```tsx
+// app/actions.ts
+'use server'
+
+export async function submitForm(formData: FormData) {
+  const title = formData.get('title');
+  const content = formData.get('content');
+  
+  // Validate
+  if (!title || !content) {
+    throw new Error('Missing required fields');
+  }
+  
+  // Process data
+  try {
+    await saveToDatabase({ title, content });
+    revalidatePath('/posts');
+    return { success: true };
+  } catch (error) {
+    return { error: 'Failed to save' };
+  }
+}
+```
+
+4. Client-side Data Fetching:
+```tsx
+'use client'
+
+import { useEffect, useState } from 'react'
+import useSWR from 'swr'
+
+// Use SWR for client-side data fetching
+export function ClientComponent() {
+  const { data, error, isLoading } = useSWR('/api/data', fetcher);
+  
+  if (error) return <ErrorComponent error={error} />;
+  if (isLoading) return <LoadingSpinner />;
+  
+  return <DataDisplay data={data} />;
+}
+```
+
+5. Error Handling Best Practices:
+- Always use try/catch blocks
+- Implement proper error boundaries
+- Return appropriate HTTP status codes
+- Provide meaningful error messages
+- Log errors for debugging
+
+6. Caching Strategies:
+- Use appropriate cache settings
+- Implement revalidation when needed
+- Consider using React Cache
+- Use proper cache tags
+
+7. Security Considerations:
+- Validate all inputs
+- Sanitize data before rendering
+- Use proper CORS settings
+- Implement rate limiting
+- Protect sensitive routes
+
+These patterns ensure efficient and secure data handling in Next.js applications. 

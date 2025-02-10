@@ -1,0 +1,246 @@
+---
+description: Next.js Component Patterns and Best Practices
+globs: ["**/*.tsx", "**/*.ts", "**/components/**/*.tsx"]
+---
+
+# Next.js Component Patterns
+
+1. Server Component Pattern:
+```tsx
+// Default server component pattern
+import { fetchData } from '@/lib/api'
+import { ProductCard } from '@/components/ui'
+
+export default async function ProductList() {
+  const products = await fetchData()
+  
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {products.map(product => (
+        <ProductCard key={product.id} {...product} />
+      ))}
+    </div>
+  )
+}
+```
+
+2. Client Component Pattern:
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+
+interface Props {
+  initialValue?: number
+  onChange?: (value: number) => void
+}
+
+export function Counter({ initialValue = 0, onChange }: Props) {
+  const [count, setCount] = useState(initialValue)
+  
+  const handleClick = () => {
+    const newValue = count + 1
+    setCount(newValue)
+    onChange?.(newValue)
+  }
+  
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      onClick={handleClick}
+      className="px-4 py-2 bg-blue-500 text-white rounded-md"
+    >
+      Count: {count}
+    </motion.button>
+  )
+}
+```
+
+3. Layout Pattern:
+```tsx
+// app/layout.tsx
+import { Header, Footer } from '@/components/layout'
+import { Providers } from '@/components/providers'
+
+export default function RootLayout({
+  children
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>
+          <Header />
+          <main className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
+      </body>
+    </html>
+  )
+}
+```
+
+4. Container Pattern:
+```tsx
+// Separate data fetching from presentation
+interface ContainerProps {
+  children: (data: Data) => React.ReactNode
+}
+
+async function DataContainer({ children }: ContainerProps) {
+  const data = await fetchData()
+  return children(data)
+}
+
+// Usage
+<DataContainer>
+  {(data) => <DataPresentation data={data} />}
+</DataContainer>
+```
+
+5. Error Boundary Pattern:
+```tsx
+'use client'
+
+interface Props {
+  children: React.ReactNode
+  fallback: React.ReactNode
+}
+
+export function ErrorBoundary({ children, fallback }: Props) {
+  return (
+    <React.Suspense fallback={<LoadingSpinner />}>
+      {children}
+    </React.Suspense>
+  )
+}
+
+// Usage
+<ErrorBoundary fallback={<ErrorMessage />}>
+  <ComponentThatMightError />
+</ErrorBoundary>
+```
+
+6. Form Pattern:
+```tsx
+'use client'
+
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8)
+})
+
+export function LoginForm() {
+  const form = useForm({
+    resolver: zodResolver(schema)
+  })
+  
+  const onSubmit = async (data) => {
+    try {
+      await loginUser(data)
+    } catch (error) {
+      form.setError('root', { message: 'Login failed' })
+    }
+  }
+  
+  return (
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      {/* Form fields */}
+    </form>
+  )
+}
+```
+
+7. Loading Pattern:
+```tsx
+// app/loading.tsx
+export default function Loading() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2" />
+    </div>
+  )
+}
+
+// Skeleton Loading
+export function ProductSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-48 bg-gray-200 rounded-md" />
+      <div className="h-4 bg-gray-200 rounded mt-4" />
+      <div className="h-4 bg-gray-200 rounded mt-2 w-2/3" />
+    </div>
+  )
+}
+```
+
+8. Best Practices:
+
+Component Organization:
+```tsx
+// components/ui/Button/index.tsx
+export interface ButtonProps {
+  variant?: 'primary' | 'secondary'
+  size?: 'sm' | 'md' | 'lg'
+  children: React.ReactNode
+}
+
+// Separate styles
+import styles from './Button.module.css'
+
+// Separate types
+import type { ButtonProps } from './types'
+
+// Separate utilities
+import { getButtonClasses } from './utils'
+```
+
+Performance Optimization:
+```tsx
+// Use memo for expensive computations
+const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b])
+
+// Use callback for function props
+const memoizedCallback = useCallback(
+  () => {
+    doSomething(a, b)
+  },
+  [a, b],
+)
+
+// Use proper key props
+{items.map(item => (
+  <ListItem key={item.id} {...item} />
+))}
+```
+
+Accessibility:
+```tsx
+// Use proper ARIA attributes
+<button
+  aria-label="Close menu"
+  aria-expanded={isOpen}
+  onClick={toggleMenu}
+>
+  <Icon name="close" />
+</button>
+
+// Use semantic HTML
+<nav aria-label="Main navigation">
+  <ul role="menubar">
+    <li role="menuitem">
+      <Link href="/">Home</Link>
+    </li>
+  </ul>
+</nav>
+```
+
+These patterns ensure consistent, maintainable, and accessible components. 
