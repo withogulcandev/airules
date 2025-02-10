@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Rules Documentation</title>
+    <!-- React CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-jsx.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function App() {
+            const [rules, setRules] = React.useState([]);
+            const [activeRule, setActiveRule] = React.useState(null);
+
+            React.useEffect(() => {
+                // Fetch rules from the rules directory
+                fetch('https://api.github.com/repos/ogulcanturk/airules/contents/rules')
+                    .then(res => res.json())
+                    .then(data => {
+                        setRules(data.filter(item => item.type === 'dir'));
+                    })
+                    .catch(console.error);
+            }, []);
+
+            const fetchRuleContent = (rule) => {
+                setActiveRule({ ...rule, content: null, loading: true });
+                
+                // Fetch rule content
+                fetch(`https://api.github.com/repos/ogulcanturk/airules/contents/rules/${rule.name}`)
+                    .then(res => res.json())
+                    .then(files => {
+                        const mdFiles = files.filter(f => f.name.endsWith('.mdc'));
+                        return Promise.all(
+                            mdFiles.map(file => 
+                                fetch(file.download_url)
+                                    .then(res => res.text())
+                                    .then(content => ({ ...file, content }))
+                            )
+                        );
+                    })
+                    .then(contents => {
+                        setActiveRule({ ...rule, content: contents, loading: false });
+                    })
+                    .catch(console.error);
+            };
+
+            return (
+                <div className="container mx-auto px-4 py-8">
+                    <header className="text-center mb-12">
+                        <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Rules Documentation</h1>
+                        <p className="text-gray-600">Select a ruleset to view its documentation</p>
+                    </header>
+
+                    <div className="grid md:grid-cols-3 gap-6">
+                        <div className="md:col-span-1">
+                            <h2 className="text-xl font-semibold mb-4">Available Rulesets</h2>
+                            <div className="space-y-2">
+                                {rules.map(rule => (
+                                    <button
+                                        key={rule.name}
+                                        onClick={() => fetchRuleContent(rule)}
+                                        className={`w-full text-left px-4 py-2 rounded ${
+                                            activeRule?.name === rule.name
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-white hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        {rule.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            {activeRule ? (
+                                <div className="bg-white rounded-lg shadow p-6">
+                                    <h2 className="text-2xl font-bold mb-4">{activeRule.name}</h2>
+                                    {activeRule.loading ? (
+                                        <p>Loading...</p>
+                                    ) : (
+                                        <div className="space-y-6">
+                                            {activeRule.content?.map((file, index) => (
+                                                <div key={index} className="prose max-w-none">
+                                                    <h3 className="text-xl font-semibold mb-2">{file.name}</h3>
+                                                    <pre className="language-typescript">
+                                                        <code>{file.content}</code>
+                                                    </pre>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+                                    Select a ruleset to view its documentation
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+        // Initialize Prism.js syntax highlighting
+        document.addEventListener('DOMContentLoaded', (event) => {
+            Prism.highlightAll();
+        });
+    </script>
+</body>
+</html> 
