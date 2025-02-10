@@ -1,6 +1,6 @@
 {
   "name": "airules",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A CLI tool for ai rules.",
   "main": "src/index.js",
   "bin": {
@@ -19,5 +19,13 @@
   ],
   "engines": {
     "node": ">=14.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ogulcanturk/airules.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ogulcanturk/airules/issues"
+  },
+  "homepage": "https://github.com/ogulcanturk/airules#readme"
 }

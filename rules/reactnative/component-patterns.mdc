@@ -1,0 +1,352 @@
+---
+description: React Native Component Patterns and Best Practices
+globs: ["**/*.tsx", "**/*.ts", "**/components/**/*.tsx"]
+---
+
+# React Native Component Patterns
+
+1. Functional Component Pattern:
+```tsx
+import React from 'react'
+import { View, Text, StyleSheet } from 'react-native'
+
+interface CardProps {
+  title: string
+  description: string
+}
+
+export function Card({ title, description }: CardProps) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.description}>{description}</Text>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 14,
+    color: '#666',
+  },
+})
+```
+
+2. Screen Component Pattern:
+```tsx
+import React from 'react'
+import { View, ScrollView, SafeAreaView, StyleSheet } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { Header, LoadingSpinner } from '@/components'
+
+interface ScreenProps {
+  children: React.ReactNode
+  loading?: boolean
+  refreshControl?: React.ReactNode
+}
+
+export function Screen({ children, loading, refreshControl }: ScreenProps) {
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <Header />
+      <ScrollView
+        style={styles.scroll}
+        refreshControl={refreshControl}
+      >
+        <View style={styles.content}>
+          {children}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+  },
+})
+```
+
+3. Form Component Pattern:
+```tsx
+import React from 'react'
+import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8)
+})
+
+export function LoginForm() {
+  const { control, handleSubmit } = useForm({
+    resolver: zodResolver(schema)
+  })
+
+  const onSubmit = async (data) => {
+    try {
+      await loginUser(data)
+    } catch (error) {
+      // Handle error
+    }
+  }
+
+  return (
+    <View style={styles.form}>
+      <Controller
+        control={control}
+        name="email"
+        render={({ field, fieldState }) => (
+          <TextInput
+            style={styles.input}
+            value={field.value}
+            onChangeText={field.onChange}
+            placeholder="Email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        )}
+      />
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSubmit(onSubmit)}
+      >
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  form: {
+    padding: 16,
+  },
+  input: {
+    height: 48,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  button: {
+    height: 48,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+})
+```
+
+4. List Component Pattern:
+```tsx
+import React from 'react'
+import { FlatList, RefreshControl, StyleSheet } from 'react-native'
+
+interface ListProps<T> {
+  data: T[]
+  renderItem: (item: T) => React.ReactNode
+  onRefresh?: () => void
+  onEndReached?: () => void
+  loading?: boolean
+}
+
+export function List<T>({
+  data,
+  renderItem,
+  onRefresh,
+  onEndReached,
+  loading
+}: ListProps<T>) {
+  return (
+    <FlatList
+      data={data}
+      renderItem={({ item }) => renderItem(item)}
+      keyExtractor={(item, index) => index.toString()}
+      onEndReached={onEndReached}
+      onEndReachedThreshold={0.5}
+      refreshControl={
+        <RefreshControl
+          refreshing={loading || false}
+          onRefresh={onRefresh}
+        />
+      }
+      style={styles.list}
+    />
+  )
+}
+
+const styles = StyleSheet.create({
+  list: {
+    flex: 1,
+  },
+})
+```
+
+5. Modal Component Pattern:
+```tsx
+import React from 'react'
+import { Modal, View, TouchableOpacity, Text, StyleSheet } from 'react-native'
+
+interface CustomModalProps {
+  visible: boolean
+  onClose: () => void
+  children: React.ReactNode
+  title?: string
+}
+
+export function CustomModal({
+  visible,
+  onClose,
+  children,
+  title
+}: CustomModalProps) {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.content}>
+          {title && <Text style={styles.title}>{title}</Text>}
+          {children}
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+          >
+            <Text style={styles.closeText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  )
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  closeButton: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  closeText: {
+    color: '#007AFF',
+    fontSize: 16,
+  },
+})
+```
+
+6. Best Practices:
+
+Performance:
+```tsx
+// Use memo for expensive components
+const MemoizedComponent = React.memo(({ prop }) => {
+  return <ExpensiveComponent prop={prop} />
+})
+
+// Use callback for event handlers
+const handlePress = useCallback(() => {
+  // Handle press
+}, [dependencies])
+
+// Use proper list optimization
+const getItemLayout = (data, index) => ({
+  length: ITEM_HEIGHT,
+  offset: ITEM_HEIGHT * index,
+  index,
+})
+```
+
+Accessibility:
+```tsx
+// Use proper accessibility props
+<TouchableOpacity
+  accessible={true}
+  accessibilityLabel="Tap me!"
+  accessibilityHint="Performs an action"
+  accessibilityRole="button"
+>
+  <Text>Button</Text>
+</TouchableOpacity>
+
+// Handle different font sizes
+const styles = StyleSheet.create({
+  text: {
+    fontSize: PixelRatio.getFontScale() * 16,
+  },
+})
+```
+
+Platform Specific Code:
+```tsx
+import { Platform, StyleSheet } from 'react-native'
+
+const styles = StyleSheet.create({
+  shadow: Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    android: {
+      elevation: 5,
+    },
+  }),
+})
+```
+
+These patterns ensure consistent, performant, and maintainable React Native components. 
