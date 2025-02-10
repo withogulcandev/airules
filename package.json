@@ -1,14 +1,19 @@
 {
   "name": "airules",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "A CLI tool for ai rules.",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "bin": {
-    "airules": "./src/index.js"
+    "airules": "./dist/index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepare": "npm run build"
   },
   "author": "Ogulcan Turk <account.work@ogulcan.dev>",
   "license": "MIT",
@@ -27,5 +32,21 @@
   "bugs": {
     "url": "https://github.com/ogulcanturk/airules/issues"
   },
-  "homepage": "https://github.com/ogulcanturk/airules#readme"
+  "homepage": "https://github.com/ogulcanturk/airules#readme",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.6",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.10",
+    "@types/node": "^20.11.19",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
 }
