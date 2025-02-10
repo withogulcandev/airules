@@ -3,20 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Rules Documentation</title>
+    <title>AI Rules</title>
     <!-- React CDN -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Prism.js for syntax highlighting -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-typescript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-jsx.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #333;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        .sidebar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .main {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+        }
+        button:hover {
+            background: #e0e0e0;
+        }
+        button.active {
+            background: #007bff;
+            color: white;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
@@ -25,19 +82,13 @@
             const [activeRule, setActiveRule] = React.useState(null);
 
             React.useEffect(() => {
-                // Fetch rules from the rules directory
                 fetch('https://api.github.com/repos/ogulcanturk/airules/contents/rules')
                     .then(res => res.json())
-                    .then(data => {
-                        setRules(data.filter(item => item.type === 'dir'));
-                    })
-                    .catch(console.error);
+                    .then(data => setRules(data.filter(item => item.type === 'dir')))
+                    .catch(err => console.error('Error fetching rules:', err));
             }, []);
 
             const fetchRuleContent = (rule) => {
-                setActiveRule({ ...rule, content: null, loading: true });
-                
-                // Fetch rule content
                 fetch(`https://api.github.com/repos/ogulcanturk/airules/contents/rules/${rule.name}`)
                     .then(res => res.json())
                     .then(files => {
@@ -46,66 +97,47 @@
                             mdFiles.map(file => 
                                 fetch(file.download_url)
                                     .then(res => res.text())
-                                    .then(content => ({ ...file, content }))
+                                    .then(content => ({ name: file.name, content }))
                             )
                         );
                     })
-                    .then(contents => {
-                        setActiveRule({ ...rule, content: contents, loading: false });
-                    })
-                    .catch(console.error);
+                    .then(contents => setActiveRule({ name: rule.name, files: contents }))
+                    .catch(err => console.error('Error fetching rule content:', err));
             };
 
             return (
-                <div className="container mx-auto px-4 py-8">
-                    <header className="text-center mb-12">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Rules Documentation</h1>
-                        <p className="text-gray-600">Select a ruleset to view its documentation</p>
+                <div className="container">
+                    <header className="header">
+                        <h1>AI Rules</h1>
                     </header>
-
-                    <div className="grid md:grid-cols-3 gap-6">
-                        <div className="md:col-span-1">
-                            <h2 className="text-xl font-semibold mb-4">Available Rulesets</h2>
-                            <div className="space-y-2">
-                                {rules.map(rule => (
-                                    <button
-                                        key={rule.name}
-                                        onClick={() => fetchRuleContent(rule)}
-                                        className={`w-full text-left px-4 py-2 rounded ${
-                                            activeRule?.name === rule.name
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-white hover:bg-gray-50'
-                                        }`}
-                                    >
-                                        {rule.name}
-                                    </button>
-                                ))}
-                            </div>
+                    
+                    <div className="content">
+                        <div className="sidebar">
+                            <h2>Available Rules</h2>
+                            {rules.map(rule => (
+                                <button
+                                    key={rule.name}
+                                    onClick={() => fetchRuleContent(rule)}
+                                    className={activeRule?.name === rule.name ? 'active' : ''}
+                                >
+                                    {rule.name}
+                                </button>
+                            ))}
                         </div>
 
-                        <div className="md:col-span-2">
+                        <div className="main">
                             {activeRule ? (
-                                <div className="bg-white rounded-lg shadow p-6">
-                                    <h2 className="text-2xl font-bold mb-4">{activeRule.name}</h2>
-                                    {activeRule.loading ? (
-                                        <p>Loading...</p>
-                                    ) : (
-                                        <div className="space-y-6">
-                                            {activeRule.content?.map((file, index) => (
-                                                <div key={index} className="prose max-w-none">
-                                                    <h3 className="text-xl font-semibold mb-2">{file.name}</h3>
-                                                    <pre className="language-typescript">
-                                                        <code>{file.content}</code>
-                                                    </pre>
-                                                </div>
-                                            ))}
+                                <>
+                                    <h2>{activeRule.name}</h2>
+                                    {activeRule.files?.map((file, index) => (
+                                        <div key={index}>
+                                            <h3>{file.name}</h3>
+                                            <pre><code>{file.content}</code></pre>
                                         </div>
-                                    )}
-                                </div>
+                                    ))}
+                                </>
                             ) : (
-                                <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
-                                    Select a ruleset to view its documentation
-                                </div>
+                                <p>Select a ruleset to view its content</p>
                             )}
                         </div>
                     </div>
@@ -115,11 +147,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-
-        // Initialize Prism.js syntax highlighting
-        document.addEventListener('DOMContentLoaded', (event) => {
-            Prism.highlightAll();
-        });
     </script>
 </body>
 </html> 
