@@ -1,6 +1,6 @@
 {
   "name": "airules",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "A CLI tool for ai rules.",
   "main": "dist/index.js",
   "bin": {
@@ -27,12 +27,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ogulcanturk/airules.git"
+    "url": "git+https://github.com/withogulcandev/airules.git"
   },
   "bugs": {
-    "url": "https://github.com/ogulcanturk/airules/issues"
+    "url": "https://github.com/withogulcandev/airules/issues"
   },
-  "homepage": "https://github.com/ogulcanturk/airules#readme",
+  "homepage": "https://github.com/withogulcandev/airules#readme",
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
@@ -40,8 +40,10 @@
     "ora": "^5.4.1"
   },
   "devDependencies": {
+    "@types/chalk": "^0.4.31",
     "@types/inquirer": "^8.2.10",
-    "@types/node": "^20.11.19",
+    "@types/node": "^20.17.17",
+    "@types/ora": "^3.1.0",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
     "@typescript-eslint/parser": "^7.0.1",
     "eslint": "^8.56.0",
